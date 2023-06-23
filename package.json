@@ -1,0 +1,37 @@
+{
+  "name": "shapez-viewer",
+  "version": "1.0.0",
+  "description": "The shapez-viewer is used to render a model of a shape by its identifier. Made for the game Shapez-2",
+  "keywords": [],
+  "homepage": "https://shapez.soren.codes/shape",
+  "bugs": {
+    "url": ""
+  },
+  "type": "module",
+  "main": "./dist/shapez-viewer.umd.cjs",
+  "module": "./dist/shapez-viewer.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/shapez-viewer.js",
+      "require": "./dist/shapez-viewer.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@types/three": "^0.152.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9",
+    "vite-plugin-dts": "^2.3.0",
+    "vite-plugin-gltf": "^3.1.0"
+  },
+  "dependencies": {
+    "three": "^0.153.0"
+  }
+}
