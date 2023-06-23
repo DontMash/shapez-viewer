@@ -5,7 +5,16 @@
   "keywords": [],
   "homepage": "https://shapez.soren.codes/shape",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/DontMash/shapez-viewer/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Sören Maschmann",
+    "url": "https://soren.codes"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DontMash/shapez-viewer"
   },
   "type": "module",
   "main": "./dist/shapez-viewer.umd.cjs",
