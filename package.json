@@ -1,8 +1,18 @@
 {
   "name": "shapez-viewer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "The shapez-viewer is used to render a model of a shape by its identifier. Made for the game Shapez-2",
-  "keywords": [],
+  "keywords": [
+    "shapez",
+    "3d",
+    "typescript",
+    "webgl",
+    "webgl2",
+    "canvas",
+    "parser",
+    "renderer",
+    "visualizer"
+  ],
   "homepage": "https://shapez.soren.codes/shape",
   "bugs": {
     "url": "https://github.com/DontMash/shapez-viewer/issues"
