@@ -1,4 +1,4 @@
-import { Material, MeshLambertMaterial, MeshPhongMaterial, MeshStandardMaterial, MeshToonMaterial, Vector3 } from 'three';
+import { Material, MeshPhongMaterial, MeshToonMaterial, Vector3 } from 'three';
 import { ShapeColorIdentifier, ShapeIdentifier } from './ShapeParser';
 
 export const SHAPE: ShapeIdentifier = 'CwRwCwCw:P-P-P-P-:P-P-P-P-:CcCcCcCc';
