@@ -1,26 +1,19 @@
-import WebGL from 'three/examples/jsm/capabilities/WebGL';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { ShapeIdentifier } from './ShapeParser';
-import ShapeRenderer from './ShapeRenderer';
+import { ShapeIdentifier, getShapeData } from './ShapeParser';
+import MultiShapeViewer, { ShapeView } from './MultiShapeViewer';
+import { SHAPE, SHAPE_LAYER_HEIGHT, SHAPE_LAYER_SCALE_FACTOR, SHAPE_QUARTER_EXPAND_OFFSET } from './const';
 
-const SHAPE: ShapeIdentifier = 'CwRwCwCw:P-P-P-P-:P-P-P-P-:CcCcCcCc';
+class ShapeViewer extends MultiShapeViewer {
+    private view: ShapeView;
 
-class ShapeViewer {
-    private renderer: ShapeRenderer;
-    private controls: OrbitControls;
+    private isLayerExpanded = false;
+    private isQuarterExpanded = false;
 
-    constructor(private canvas: HTMLCanvasElement) {
-        if (!WebGL.isWebGLAvailable()) {
-            throw getError('create', 'WebGL is not supported');
-        }
+    constructor(canvas: HTMLCanvasElement) {
+        super(canvas, [{ shape: SHAPE, element: canvas }]);
 
-        this.renderer = new ShapeRenderer(canvas, this.width, this.height, window.devicePixelRatio);
-        this.controls = this.createControls();
-
-        const resizeObserver = new ResizeObserver(() => this.onResize());
-        resizeObserver.observe(this.canvas.parentElement ?? document.body);
-
-        this.update();
+        this.view = this.views[0];
+        this.view.camera.position.y = 2;
+        this.view.camera.position.z = 1.5;
     }
 
     get width(): number {
@@ -31,62 +24,66 @@ class ShapeViewer {
         return this.canvas.parentElement ? this.canvas.parentElement.clientHeight : window.innerHeight;
     }
 
-    get isInitialized(): boolean {
-        return this.renderer.isInitialized;
-    }
-
-    init(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            if (this.isInitialized) {
-                return resolve();
-            }
-
-            this.renderer.init()
-                .then(resolve)
-                .catch(reject);
-        });
-    }
-
-    draw(identifier: ShapeIdentifier = SHAPE) {
+    assign(identifier: ShapeIdentifier = SHAPE) {
         if (!this.isInitialized) {
-            throw getError('draw', 'Not initialized');
+            throw getError('assign', 'Not initialized');
         }
 
-        this.renderer.draw(identifier);
+        this.clear();
+        this.view.data = getShapeData(identifier);
+        this.assignShape(this.view);
+    }
+
+    clear() {
+        this.view.base.children.forEach(layer => layer.children = []);
     }
 
     expandLayers() {
-        this.renderer.expandLayers();
+        if (this.isLayerExpanded) return;
+
+        this.isLayerExpanded = true;
+        this.view.base.children.forEach((layer, layerIndex) => {
+            layer.position.y += (layerIndex + 1) * SHAPE_LAYER_HEIGHT;
+        });
     }
+
     collapseLayers() {
-        this.renderer.collapseLayers();
+        if (!this.isLayerExpanded) return;
+
+        this.isLayerExpanded = false;
+        this.view.base.children.forEach((layer, layerIndex) => {
+            layer.position.y -= (layerIndex + 1) * SHAPE_LAYER_HEIGHT;
+        });
     }
+
     expandQuarters() {
-        this.renderer.expandQuarters();
+        if (this.isQuarterExpanded) return;
+
+        this.isQuarterExpanded = true;
+        this.view.base.children.forEach((layer, layerIndex) => {
+            layer.children.forEach(quarter => {
+                const offset = SHAPE_QUARTER_EXPAND_OFFSET
+                    .clone()
+                    .applyQuaternion(quarter.quaternion)
+                    .multiplyScalar((layerIndex + 1) * SHAPE_LAYER_SCALE_FACTOR);
+                quarter.position.add(offset);
+            });
+        });
     }
+
     collapseQuarters() {
-        this.renderer.collapseQuarters();
-    }
+        if (!this.isQuarterExpanded) return;
 
-    private createControls(camera = this.renderer.context.camera, renderer = this.renderer.context.renderer): OrbitControls {
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enablePan = false;
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 1.5;
-        controls.maxDistance = 3;
-        controls.maxPolarAngle = Math.PI * 0.4;
-        return controls;
-    }
-
-    private update() {
-        requestAnimationFrame(() => this.update());
-
-        this.controls.update();
-    }
-
-    private onResize() {
-        this.renderer.resize(this.width, this.height, window.devicePixelRatio);
+        this.isQuarterExpanded = false;
+        this.view.base.children.forEach((layer, layerIndex) => {
+            layer.children.forEach(quarter => {
+                const offset = SHAPE_QUARTER_EXPAND_OFFSET
+                    .clone()
+                    .applyQuaternion(quarter.quaternion)
+                    .multiplyScalar((layerIndex + 1) * SHAPE_LAYER_SCALE_FACTOR);
+                quarter.position.sub(offset);
+            });
+        });
     }
 }
 

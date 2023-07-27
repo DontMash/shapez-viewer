@@ -23,7 +23,7 @@ const SHAPE_IDENTIFIER_REGEX = /^([CRWSP-][rgbypcwu-]){4}(:([CRWSP-][rgbypcwu-])
 
 export const getShapeData = (identifier: ShapeIdentifier): ShapeData => {
     if (!identifier.match(SHAPE_IDENTIFIER_REGEX)) {
-        throw getError('getShapeData', 'Invalid shape identifier');
+        throw getError('getShapeData', `Invalid shape identifier ${identifier}`);
     }
 
     const layerIdentifiers: Array<ShapeIdentifier> = identifier.split(SHAPE_LAYER_IDENTIFIER_SEPERATOR);
