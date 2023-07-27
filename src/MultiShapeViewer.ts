@@ -16,6 +16,7 @@ import MultiShapeRenderer from './MultiShapeRenderer';
 import {
     SHAPE_BASE_OFFSET,
     SHAPE_COLOR_BASE_MATERIAL,
+    SHAPE_COLOR_CRYSTAL_MATERIAL,
     SHAPE_COLOR_MATERIALS,
     SHAPE_LAYER_HEIGHT,
     SHAPE_LAYER_SCALE_FACTOR,
@@ -198,6 +199,7 @@ class MultiShapeViewer {
             W: models[2],
             S: models[3],
             P: models[4],
+            c: models[0],
             '-': undefined
         };
         return quarters;
@@ -225,7 +227,7 @@ class MultiShapeViewer {
 
                 const shapeQuarter = quarter.clone();
                 shapeQuarter.rotateY(Math.PI * -0.5 * quarterDataIndex);
-                const material = SHAPE_COLOR_MATERIALS[quarterData.color];
+                const material = quarterData.type === 'c' ? SHAPE_COLOR_CRYSTAL_MATERIAL : SHAPE_COLOR_MATERIALS[quarterData.color];
                 shapeQuarter.material = material;
 
                 shapeLayer.add(shapeQuarter);
