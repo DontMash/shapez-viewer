@@ -19,7 +19,7 @@ export type ShapeData = {
 const SHAPE_LAYER_IDENTIFIER_SEPERATOR = ':';
 const SHAPE_QUARTER_REGEX = /(..?)/g;
 const SHAPE_QUARTER_PARAMETERS_REGEX = /(.?)/g;
-const SHAPE_IDENTIFIER_REGEX = /^([CRWSPc-][rgbypcwu-]){1,4}(:([CRWSPc-][rgbypcwu-]){4}){0,3}$/;
+const SHAPE_IDENTIFIER_REGEX = /^([CRWSPc-][rgbypcwu-]){1,4}(:([CRWSPc-][rgbypcwu-]){1,4}){0,3}$/;
 
 export const getShapeData = (identifier: ShapeIdentifier): ShapeData => {
     if (!identifier.match(SHAPE_IDENTIFIER_REGEX)) {
