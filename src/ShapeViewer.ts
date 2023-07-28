@@ -35,7 +35,7 @@ class ShapeViewer extends MultiShapeViewer {
     }
 
     clear() {
-        this.view.base.children.forEach(layer => layer.children = []);
+        this.view.base.children.forEach(layer => layer.children.forEach(quarter => quarter.children = []));
     }
 
     expandLayers() {

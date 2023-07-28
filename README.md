@@ -1,5 +1,5 @@
 # Shapez Viewer
 
 ## Roadmap
-- MultiViewer
-- Performance optimizations
+- blueprint viewer
+- README

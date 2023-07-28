@@ -5,6 +5,7 @@ export const SHAPE: ShapeIdentifier = 'CwRwCwCw:P-P-P-P-:P-P-P-P-:CcCcCcCc';
 
 export const SHAPE_BASE_OFFSET = 0.05;
 export const SHAPE_MAX_LAYERS = 4;
+export const SHAPE_MAX_QUARTERS = 4;
 export const SHAPE_LAYER_HEIGHT = 0.1;
 export const SHAPE_QUARTER_EXPAND_OFFSET = new Vector3(0.3, 0, 0.3);
 export const SHAPE_LAYER_SCALE_FACTOR = 0.24;

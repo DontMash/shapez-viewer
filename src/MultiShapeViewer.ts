@@ -20,7 +20,8 @@ import {
     SHAPE_COLOR_MATERIALS,
     SHAPE_LAYER_HEIGHT,
     SHAPE_LAYER_SCALE_FACTOR,
-    SHAPE_MAX_LAYERS
+    SHAPE_MAX_LAYERS,
+    SHAPE_MAX_QUARTERS
 } from './const';
 
 import CIRCLE_QUARTER_DATA from './assets/models/gltf/shapes/circle-quarter.gltf';
@@ -139,6 +140,11 @@ class MultiShapeViewer {
             layer.position.y = i * SHAPE_LAYER_HEIGHT + SHAPE_BASE_OFFSET;
             layer.scale.x = 1 - i * SHAPE_LAYER_SCALE_FACTOR;
             layer.scale.z = 1 - i * SHAPE_LAYER_SCALE_FACTOR;
+            for (let k = 0; k < SHAPE_MAX_QUARTERS; k++) {
+                const quarter = new Group();
+                quarter.rotateY(Math.PI * -0.5 * k);
+                layer.add(quarter);
+            }
             base.add(layer);
         }
         return base;
@@ -218,21 +224,29 @@ class MultiShapeViewer {
 
     protected assignShape(view: ShapeView) {
         const shape = view.data;
-        let currentLayerIndex = 0;
-        shape.layers.forEach(layerData => {
-            const shapeLayer = view.base.children[currentLayerIndex++];
+        shape.layers.forEach((layerData, layerDataIndex) => {
             layerData.quarters.forEach((quarterData, quarterDataIndex) => {
                 const quarter = this.getQuarter(quarterData.type);
                 if (!quarter) return;
 
                 const shapeQuarter = quarter.clone();
-                shapeQuarter.rotateY(Math.PI * -0.5 * quarterDataIndex);
                 const material = quarterData.type === 'c' ? SHAPE_COLOR_CRYSTAL_MATERIAL : SHAPE_COLOR_MATERIALS[quarterData.color];
                 shapeQuarter.material = material;
 
-                shapeLayer.add(shapeQuarter);
+                this.assignQuarter(view, shapeQuarter, layerDataIndex, quarterDataIndex);
             });
         });
+    }
+
+    private assignQuarter(view: ShapeView, shapeQuarter: ShapeQuarter, layerIndex: number, quarterIndex: number) {
+        if (layerIndex < 0 || layerIndex > 3)
+            throw getError('assignQuarter', `Invalid layerIndex ${layerIndex}`);
+        if (quarterIndex < 0 || quarterIndex > 3)
+            throw getError('assignQuarter', `Invalid quarterIndex ${quarterIndex}`);
+
+        const layer = view.base.children[layerIndex];
+        const quarter = layer.children[quarterIndex];
+        quarter.add(shapeQuarter);
     }
 
     private getQuarter(type: ShapeTypeIdentifier): ShapeQuarter | undefined {
