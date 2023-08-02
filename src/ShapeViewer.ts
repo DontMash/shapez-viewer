@@ -9,7 +9,7 @@ class ShapeViewer extends MultiShapeViewer {
     private isQuarterExpanded = false;
 
     constructor(canvas: HTMLCanvasElement) {
-        super(canvas, [{ shape: SHAPE, element: canvas }]);
+        super(canvas, [{ shape: SHAPE, element: canvas }], window.devicePixelRatio);
 
         this.view = this.views[0];
         this.view.camera.position.y = 2;
@@ -17,11 +17,11 @@ class ShapeViewer extends MultiShapeViewer {
     }
 
     get width(): number {
-        return this.canvas.parentElement ? this.canvas.parentElement.clientWidth : window.innerWidth;
+        return this.canvas.offsetParent ? this.canvas.offsetParent.clientWidth : window.innerWidth;
     }
 
     get height(): number {
-        return this.canvas.parentElement ? this.canvas.parentElement.clientHeight : window.innerHeight;
+        return this.canvas.offsetParent ? this.canvas.offsetParent.clientHeight : window.innerHeight;
     }
 
     assign(identifier: ShapeIdentifier = SHAPE) {

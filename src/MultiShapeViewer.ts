@@ -52,7 +52,7 @@ class MultiShapeViewer {
     private renderer: MultiShapeRenderer;
     private quarters: ShapeQuarterMap | undefined;
 
-    constructor(protected canvas: HTMLCanvasElement, viewOptions: Array<ShapeViewOption>) {
+    constructor(protected canvas: HTMLCanvasElement, viewOptions: Array<ShapeViewOption>, private pixelRatio?: number) {
         if (!WebGL.isWebGLAvailable()) {
             throw getError('create', 'WebGL is not supported');
         }
@@ -60,7 +60,7 @@ class MultiShapeViewer {
             throw getError('constructor', 'No views defined');
         }
 
-        this.renderer = new MultiShapeRenderer(this.canvas, this.width, this.height, window.devicePixelRatio);
+        this.renderer = new MultiShapeRenderer(this.canvas, this.width, this.height, this.pixelRatio);
         this.views = viewOptions.map<ShapeView>(option => {
             const camera = this.createCamera();
             const controls = this.createControls(camera, option.element);
@@ -84,10 +84,12 @@ class MultiShapeViewer {
         return !!this.quarters;
     }
     get width(): number {
-        return this.canvas.parentElement ? this.canvas.parentElement.scrollWidth : window.innerWidth;
+        return this.canvas.offsetParent ? this.canvas.offsetParent.scrollWidth : window.innerWidth;
+        return 3152;
     }
     get height(): number {
-        return this.canvas.parentElement ? this.canvas.parentElement.scrollHeight : window.innerHeight;
+        return this.canvas.offsetParent ? this.canvas.offsetParent.scrollHeight : window.innerHeight;
+        return 2624;
     }
 
     init(): Promise<void> {
@@ -163,22 +165,24 @@ class MultiShapeViewer {
     private update() {
         requestAnimationFrame(() => this.update());
 
-        const elements = this.views.filter(view => {
-            const rect = view.element.getBoundingClientRect();
-            return rect.top < window.innerHeight && rect.bottom > 0 && rect.left < window.innerWidth && rect.right > 0;
-        }).map(view => {
-            view.controls.update();
+        const elements = this.views
+            .filter(view => {
+                const rect = view.element.getBoundingClientRect();
+                return rect.top < window.innerHeight && rect.bottom > 0 && rect.left < window.innerWidth && rect.right > 0;
+            })
+            .map(view => {
+                view.controls.update();
 
-            return {
-                scene: view.scene,
-                camera: view.camera,
-                data: view.data,
-                top: view.element.offsetTop,
-                left: view.element.offsetLeft,
-                width: view.element.offsetWidth,
-                height: view.element.offsetHeight,
-            };
-        });
+                return {
+                    scene: view.scene,
+                    camera: view.camera,
+                    data: view.data,
+                    top: view.element.offsetTop,
+                    left: view.element.offsetLeft,
+                    width: view.element.clientWidth,
+                    height: view.element.clientHeight,
+                };
+            });
         this.renderer.update(elements);
     }
 
@@ -219,7 +223,7 @@ class MultiShapeViewer {
             view.camera.updateProjectionMatrix();
         });
 
-        this.renderer.resize(this.width, this.height, window.devicePixelRatio);
+        this.renderer.resize(this.width, this.height);
     }
 
     protected assignShape(view: ShapeView) {

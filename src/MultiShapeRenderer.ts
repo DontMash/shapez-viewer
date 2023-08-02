@@ -19,11 +19,17 @@ type ShapeViewElement = {
 class MultiShapeRenderer {
     private renderer: WebGLRenderer;
 
-    constructor(private canvas: HTMLCanvasElement, private width: number, private height: number, private pixelRatio: number = 1) {
-        this.renderer = this.createRenderer(this.canvas, this.width, this.height, this.pixelRatio);
+    constructor(
+        private canvas: HTMLCanvasElement,
+        private width: number,
+        private height: number,
+        private pixelRatio?: number,
+    ) {
+        this.renderer = this.createRenderer(this.canvas);
+        this.onResize();
     }
 
-    private createRenderer(canvas: HTMLCanvasElement, width: number, height: number, pixelRatio: number): WebGLRenderer {
+    private createRenderer(canvas: HTMLCanvasElement): WebGLRenderer {
         const renderer = new WebGLRenderer({
             alpha: true,
             antialias: true,
@@ -31,18 +37,16 @@ class MultiShapeRenderer {
         });
         ColorManagement.enabled = true;
         renderer.useLegacyLights = false;
-        renderer.setPixelRatio(pixelRatio);
-        renderer.setSize(width, height);
         renderer.setScissorTest(true);
         return renderer;
     }
 
     update(elements: Array<ShapeViewElement>) {
         elements.forEach(element => {
-            const width = element.width
+            const width = element.width;
             const height = element.height;
             const left = element.left;
-            const bottom = this.height - height - element.top;
+            const bottom = this.height - element.top - element.height;
 
             this.renderer.setViewport(left, bottom, width, height);
             this.renderer.setScissor(left, bottom, width, height);
@@ -50,17 +54,17 @@ class MultiShapeRenderer {
         });
     }
 
-    resize(width: number, height: number, pixelRatio: number = 1) {
+    resize(width: number, height: number) {
         this.width = width;
         this.height = height;
-        this.pixelRatio = pixelRatio;
 
         this.onResize();
     }
 
     private onResize() {
         this.renderer.setSize(this.width, this.height);
-        this.renderer.setPixelRatio(this.pixelRatio);
+        if (this.pixelRatio)
+            this.renderer.setPixelRatio(this.pixelRatio);
     }
 }
 
