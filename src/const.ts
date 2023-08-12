@@ -1,4 +1,4 @@
-import { Material, MeshPhongMaterial, MeshToonMaterial, Vector3 } from 'three';
+import { Material, MeshBasicMaterial, Vector3 } from 'three';
 import { ShapeColorIdentifier, ShapeIdentifier } from './ShapeParser';
 
 export const SHAPE: ShapeIdentifier = 'CwRwCwCw:P-P-P-P-:P-P-P-P-:CcCcCcCc';
@@ -21,17 +21,17 @@ export const SHAPE_COLOR_PURPLE = 0xcc00cc;
 export const SHAPE_COLOR_CYAN = 0x00eeee;
 export const SHAPE_COLOR_WHITE = 0xfafafa;
 
-export const SHAPE_COLOR_BASE_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_BASE });
-export const SHAPE_COLOR_NONE_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_NONE, vertexColors: true });
-export const SHAPE_COLOR_PIN_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_PIN, vertexColors: true });
-export const SHAPE_COLOR_CRYSTAL_MATERIAL = new MeshPhongMaterial({ color: SHAPE_COLOR_PIN, specular: 0xffffff, shininess: 10 });
-export const SHAPE_COLOR_RED_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_RED, vertexColors: true });
-export const SHAPE_COLOR_GREEN_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_GREEN, vertexColors: true });
-export const SHAPE_COLOR_BLUE_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_BLUE, vertexColors: true });
-export const SHAPE_COLOR_YELLOW_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_YELLOW, vertexColors: true });
-export const SHAPE_COLOR_PURPLE_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_PURPLE, vertexColors: true });
-export const SHAPE_COLOR_CYAN_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_CYAN, vertexColors: true });
-export const SHAPE_COLOR_WHITE_MATERIAL = new MeshToonMaterial({ color: SHAPE_COLOR_WHITE, vertexColors: true });
+export const SHAPE_COLOR_BASE_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_BASE });
+export const SHAPE_COLOR_NONE_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_NONE, vertexColors: true });
+export const SHAPE_COLOR_PIN_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_PIN, vertexColors: true });
+export const SHAPE_COLOR_CRYSTAL_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_PIN });
+export const SHAPE_COLOR_RED_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_RED, vertexColors: true });
+export const SHAPE_COLOR_GREEN_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_GREEN, vertexColors: true });
+export const SHAPE_COLOR_BLUE_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_BLUE, vertexColors: true });
+export const SHAPE_COLOR_YELLOW_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_YELLOW, vertexColors: true });
+export const SHAPE_COLOR_PURPLE_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_PURPLE, vertexColors: true });
+export const SHAPE_COLOR_CYAN_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_CYAN, vertexColors: true });
+export const SHAPE_COLOR_WHITE_MATERIAL = new MeshBasicMaterial({ color: SHAPE_COLOR_WHITE, vertexColors: true });
 
 export const SHAPE_COLOR_MATERIALS: Record<ShapeColorIdentifier, Material> = {
     r: SHAPE_COLOR_RED_MATERIAL,

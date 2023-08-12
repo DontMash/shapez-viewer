@@ -1,31 +1,27 @@
 import {
-    Camera,
     ColorManagement,
-    Scene,
     WebGLRenderer
 } from 'three';
-import { ShapeData } from './ShapeParser';
+import ShapeView from './ShapeView';
 
-type ShapeViewElement = {
-    scene: Scene,
-    camera: Camera,
-    data: ShapeData,
-    top: number,
-    left: number,
-    width: number,
-    height: number,
-};
-
-class MultiShapeRenderer {
+class ShapeRenderer {
     private renderer: WebGLRenderer;
+    private pixelRatio_: number | undefined;
 
     constructor(
         private canvas: HTMLCanvasElement,
         private width: number,
         private height: number,
-        private pixelRatio?: number,
     ) {
         this.renderer = this.createRenderer(this.canvas);
+        this.onResize();
+    }
+
+    get pixelRatio(): number | undefined {
+        return this.pixelRatio_;
+    }
+    set pixelRatio(value: number | undefined) {
+        this.pixelRatio_ = value;
         this.onResize();
     }
 
@@ -41,31 +37,30 @@ class MultiShapeRenderer {
         return renderer;
     }
 
-    update(elements: Array<ShapeViewElement>) {
-        elements.forEach(element => {
-            const width = element.width;
-            const height = element.height;
-            const left = element.left;
-            const bottom = this.height - element.top - element.height;
+    update(views: Array<ShapeView>) {
+        views.forEach(view => {
+            const width = view.width;
+            const height = view.height;
+            const left = view.left;
+            const bottom = this.height - view.top - view.height;
 
             this.renderer.setViewport(left, bottom, width, height);
             this.renderer.setScissor(left, bottom, width, height);
-            this.renderer.render(element.scene, element.camera);
+            this.renderer.render(view.scene, view.camera);
         });
     }
 
     resize(width: number, height: number) {
         this.width = width;
         this.height = height;
-
         this.onResize();
     }
 
     private onResize() {
         this.renderer.setSize(this.width, this.height);
-        if (this.pixelRatio)
-            this.renderer.setPixelRatio(this.pixelRatio);
+        if (this.pixelRatio_)
+            this.renderer.setPixelRatio(this.pixelRatio_);
     }
 }
 
-export default MultiShapeRenderer;
+export default ShapeRenderer;
