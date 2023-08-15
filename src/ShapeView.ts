@@ -1,12 +1,10 @@
 import {
     AmbientLight,
-    CylinderGeometry,
     DirectionalLight,
     Group,
-    Mesh,
     Object3D,
     PerspectiveCamera,
-    Scene
+    Scene,
 } from 'three';
 import {
     ShapeData,
@@ -15,14 +13,13 @@ import {
     ShapeQuarter,
     ShapeQuarterIndex,
     ShapeQuarterMap,
-    getQuarters,
-    getShapeData
+    getShapeQuarters,
+    getShapeData,
+    getShapeModels
 } from './ShapeParser';
 import {
     SHAPE,
-    SHAPE_BASE_OFFSET,
     SHAPE_COLOR_BASE_MATERIAL,
-    SHAPE_COLOR_CRYSTAL_MATERIAL,
     SHAPE_COLOR_MATERIALS,
     SHAPE_LAYER_HEIGHT,
     SHAPE_LAYER_SCALE_FACTOR,
@@ -32,9 +29,10 @@ import {
 } from './const';
 
 class ShapeView {
-    private _camera: PerspectiveCamera;
-    private _scene: Scene;
-    private _base: Object3D;
+    readonly camera: PerspectiveCamera;
+    readonly scene: Scene;
+
+    private readonly base: Group;
     private _data: ShapeData;
 
     private quarterMap: ShapeQuarterMap | undefined;
@@ -48,12 +46,12 @@ class ShapeView {
         private _width: number = 256,
         private _height: number = 256,
     ) {
-        this._camera = this.createCamera(_width, _height);
-        this._scene = new Scene();
+        this.camera = this.createCamera(_width, _height);
+        this.scene = new Scene();
         const lights = this.createLights();
         this.scene.add(lights);
-        this._base = this.createBase();
-        this.scene.add(this._base);
+        this.base = this.createBase();
+        this.scene.add(this.base);
         this._data = getShapeData(identifier);
     }
 
@@ -61,12 +59,6 @@ class ShapeView {
         return !!this.quarterMap;
     }
 
-    get camera(): PerspectiveCamera {
-        return this._camera;
-    }
-    get scene(): Scene {
-        return this._scene;
-    }
     get data(): ShapeData {
         return this._data;
     }
@@ -90,11 +82,17 @@ class ShapeView {
                 return resolve();
             }
 
-            getQuarters()
-                .then(quarters => {                    
+            getShapeQuarters()
+                .then(quarters => {
                     this.quarterMap = quarters;
-                    this.update();
-                    return resolve();
+
+                    getShapeModels().then(models => {
+                        const baseModel = models[0].clone();
+                        baseModel.material = SHAPE_COLOR_BASE_MATERIAL;
+                        this.scene.add(baseModel);
+                        this.update();
+                        return resolve();
+                    }).catch(reject);
                 })
                 .catch(reject);
         });
@@ -122,15 +120,11 @@ class ShapeView {
         return lights;
     }
 
-    private createBase(): Object3D {
-        const geometry = new CylinderGeometry(0.55, 0.55, 0.1, 32);
-        const base = new Mesh(geometry, SHAPE_COLOR_BASE_MATERIAL);
-        base.position.y = -SHAPE_BASE_OFFSET;
-        base.rotateY(Math.PI * 0.5);
-        base.receiveShadow = true;
+    private createBase(): Group {
+        const base = new Group();
         for (let i = 0; i < SHAPE_MAX_LAYERS; i++) {
             const layer = new Group();
-            layer.position.y = i * SHAPE_LAYER_HEIGHT + SHAPE_BASE_OFFSET;
+            layer.position.y = i * SHAPE_LAYER_HEIGHT;
             layer.scale.x = 1 - i * SHAPE_LAYER_SCALE_FACTOR;
             layer.scale.z = 1 - i * SHAPE_LAYER_SCALE_FACTOR;
             for (let k = 0; k < SHAPE_MAX_QUARTERS; k++) {
@@ -153,8 +147,8 @@ class ShapeView {
     }
 
     private resize() {
-        this._camera.aspect = this._width / this._height;
-        this._camera.updateProjectionMatrix();
+        this.camera.aspect = this._width / this._height;
+        this.camera.updateProjectionMatrix();
     }
 
     update(identifier?: ShapeIdentifier) {
@@ -162,12 +156,13 @@ class ShapeView {
             this.clear();
             this._data = getShapeData(identifier);
         }
-
         this.updateShape();
     }
 
     clear() {
-        this._base.children.forEach(layer => layer.children.forEach(quarter => quarter.children = []));
+        this.base.children
+            .forEach(layer => layer.children
+                .forEach(quarter => quarter.children = []));
     }
 
     private updateShape() {
@@ -182,7 +177,7 @@ class ShapeView {
                 if (!quarter) return;
 
                 const shapeQuarter = quarter.clone();
-                const material = quarterData.type === 'c' ? SHAPE_COLOR_CRYSTAL_MATERIAL : SHAPE_COLOR_MATERIALS[quarterData.color];
+                const material = SHAPE_COLOR_MATERIALS[quarterData.color];
                 shapeQuarter.material = material;
 
                 this.assignQuarter(shapeQuarter, layerDataIndex as ShapeLayerIndex, quarterDataIndex as ShapeQuarterIndex);
@@ -196,7 +191,7 @@ class ShapeView {
         if (quarterIndex < 0 || quarterIndex > 3)
             throw getError('assignQuarter', `Invalid quarterIndex ${quarterIndex}`);
 
-        const layer = this._base.children[layerIndex];
+        const layer = this.base.children[layerIndex];
         const quarter = layer.children[quarterIndex];
         quarter.add(shapeQuarter);
     }
@@ -205,7 +200,7 @@ class ShapeView {
         if (this.isLayerExpanded) return;
 
         this.isLayerExpanded = true;
-        this._base.children.forEach((layer, layerIndex) => {
+        this.base.children.forEach((layer, layerIndex) => {
             layer.position.y += (layerIndex + 1) * SHAPE_LAYER_HEIGHT;
         });
     }
@@ -214,7 +209,7 @@ class ShapeView {
         if (!this.isLayerExpanded) return;
 
         this.isLayerExpanded = false;
-        this._base.children.forEach((layer, layerIndex) => {
+        this.base.children.forEach((layer, layerIndex) => {
             layer.position.y -= (layerIndex + 1) * SHAPE_LAYER_HEIGHT;
         });
     }
@@ -223,12 +218,12 @@ class ShapeView {
         if (this.isQuarterExpanded) return;
 
         this.isQuarterExpanded = true;
-        this._base.children.forEach((layer, layerIndex) => {
+        this.base.children.forEach((layer, layerIndex) => {
             layer.children.forEach(quarter => {
                 const offset = SHAPE_QUARTER_EXPAND_OFFSET
                     .clone()
                     .applyQuaternion(quarter.quaternion)
-                    .multiplyScalar((layerIndex + 1) * SHAPE_LAYER_SCALE_FACTOR);
+                    .multiplyScalar((layerIndex + 1) * SHAPE_LAYER_SCALE_FACTOR)
                 quarter.position.add(offset);
             });
         });
@@ -238,7 +233,7 @@ class ShapeView {
         if (!this.isQuarterExpanded) return;
 
         this.isQuarterExpanded = false;
-        this._base.children.forEach((layer, layerIndex) => {
+        this.base.children.forEach((layer, layerIndex) => {
             layer.children.forEach(quarter => {
                 const offset = SHAPE_QUARTER_EXPAND_OFFSET
                     .clone()
